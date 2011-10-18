@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="@string/hello"
-    />
+android:orientation="horizontal" android:layout_width="fill_parent"
+android:layout_height="fill_parent" android:id="@+id/layout">
+
+<FrameLayout android:id="@+id/preview"
+android:layout_weight="3" android:layout_width="fill_parent"
+android:layout_height="fill_parent">
+</FrameLayout>
+
+<LinearLayout 
+android:orientation="vertical" 
+android:layout_width="wrap_content"
+android:layout_gravity="bottom|center"
+android:layout_height="wrap_content" android:id="@+id/layoutr">
+	<Button android:layout_width="wrap_content"
+	android:layout_height="wrap_content" android:id="@+id/astartClick"
+	android:text="start"></Button>
+	<Button android:layout_width="wrap_content"
+	android:layout_height="wrap_content" android:id="@+id/astopClick"
+	android:text="stop"></Button>	
+	<Button android:layout_width="wrap_content"
+	android:layout_height="wrap_content" android:id="@+id/startClick"
+	android:text="start Capture"></Button>
+	<Button android:layout_width="wrap_content"
+	android:layout_height="wrap_content" android:id="@+id/stopClick"
+	android:text="stop Capture"></Button>
 </LinearLayout>
+
+
+</LinearLayout>
+
+

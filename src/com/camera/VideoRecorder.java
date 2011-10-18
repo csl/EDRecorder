@@ -26,6 +26,7 @@ import android.media.ExifInterface;
 import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
@@ -39,7 +40,11 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.Window;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -69,6 +74,7 @@ public class VideoRecorder extends Activity{
 	  boolean stoppedRecording=false;
 	  
 	  private String TAG = "VideoRecorder";
+	  private GLSurfaceView glsView;
 	  
 	  // In this method, create an object of MediaRecorder class. Create an object of 
 	    // RecorderPreview class(Customized View). Add RecorderPreview class object
@@ -76,16 +82,58 @@ public class VideoRecorder extends Activity{
 	  public void onCreate(Bundle savedInstanceState) 
 	  {
 	     super.onCreate(savedInstanceState);
-	     
+	     setContentView(R.layout.main);
+
 	     recorder = new MediaRecorder();
 	     recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 	     recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 	     recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
 	     //recorder.setMaxDuration(5000);
-	     mPreview = new Preview(VideoRecorder.this,recorder);
+	     mPreview = new Preview(VideoRecorder.this, recorder);
 	     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-	     setContentView(mPreview);
-	      
+	    
+	     ((FrameLayout) findViewById(R.id.preview)).addView(mPreview);
+
+	     Button astartClick = (Button) findViewById(R.id.astartClick);
+	     astartClick.setOnClickListener(new OnClickListener() {
+	    	 public void onClick(View v) 
+		     {
+	 	        recorder.start();
+		        startedRecording=true;
+		     }
+	     });
+
+	     Button astopClick = (Button) findViewById(R.id.astopClick);
+	     astopClick.setOnClickListener(new OnClickListener() {
+	    	 public void onClick(View v) 
+		     {
+			      //stop the recorder
+			      recorder.stop();
+			      recorder.release();
+			      recorder = null;
+			      stoppedRecording=true;		    	 
+		     }
+	     });
+	     
+	     
+	     Button startClick = (Button) findViewById(R.id.startClick);
+	     startClick.setOnClickListener(new OnClickListener() {
+		     public void onClick(View v) 
+		     {
+		    	 
+		     }
+	     });
+	     
+	     Button stopClick = (Button) findViewById(R.id.stopClick);
+	     stopClick.setOnClickListener(new OnClickListener() {
+	    	 public void onClick(View v) 
+		     {
+		    	 
+		     }
+	     });
+	     //glsView = (GLSurfaceView) findViewById(R.id.mSurfaceView1);
+	     //glsView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
 	   } 
 	  
 	   /*!
@@ -101,9 +149,11 @@ public class VideoRecorder extends Activity{
 	  {
 	    super.onPrepareOptionsMenu(menu);
 	    menu.clear(); 
-	    menu.add(0, 0, 0, "Start Recording"); 
-	    menu.add(1, 1, 0, "Stop Recording");
+	    //menu.add(0, 0, 0, "Start Recording"); 
+	    //menu.add(1, 1, 0, "Stop Recording");
+	    menu.add(0, 0, 0, "GoogleMap Tracker");
 	    
+	    /*
 	    menu.setGroupVisible(0, false);
 	    menu.setGroupVisible(1, false);
 	    
@@ -111,6 +161,7 @@ public class VideoRecorder extends Activity{
 	      menu.setGroupVisible(0, true);
 	    else if(startedRecording == true && stoppedRecording == false)
 	      menu.setGroupVisible(1, true);
+	    */
 	    
 	    return true;
 	  }
@@ -128,20 +179,10 @@ public class VideoRecorder extends Activity{
 	    switch (item.getItemId()) 
 	    {
 	    case 0:
-	      //start the recorder
-	        recorder.start();
-	        startedRecording=true;
-	      
-	      break;
-	 
-	    case 1: 
-	      //stop the recorder
-	      recorder.stop();
-	      recorder.release();
-	      recorder = null;
-	      stoppedRecording=true;
-	      break;
-	      
+	          Intent open = new Intent();
+	          open.setClass(VideoRecorder.this, MyGoogleMap.class);
+	          startActivity(open);	    	
+		  break;
 	    
 	    default:
 	      break;
@@ -159,7 +200,8 @@ public class VideoRecorder extends Activity{
 	      //surfaceHolder class by calling getHolder() method. After that add   
 	      //callback to the surfaceHolder. The callback will inform when surface is 
 	      //created/changed/destroyed. Also set surface not to have its own buffers.
-	    public Preview(Context context,MediaRecorder recorder) {
+	    public Preview(Context context,MediaRecorder recorder) 
+	    {
 	      super(context);
 	      tempRecorder=recorder;
 	      mHolder=getHolder();
@@ -181,7 +223,7 @@ public class VideoRecorder extends Activity{
 	    
 	    public void surfaceCreated(SurfaceHolder holder){
 	      
-	      tempRecorder.setOutputFile("/sdcard/abc" + Math.random()%1000 + ".3gpp");
+	      tempRecorder.setOutputFile("/sdcard/" + Math.random()%1000 + ".3gpp");
 	      tempRecorder.setPreviewDisplay(mHolder.getSurface());
 	      try{
 	        tempRecorder.prepare();
