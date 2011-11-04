@@ -1,7 +1,7 @@
 #
 # A fatal error has been detected by the Java Runtime Environment:
 #
-#  Internal Error (classFileParser.cpp:3375), pid=1988, tid=832
+#  Internal Error (classFileParser.cpp:3375), pid=4032, tid=284
 #  Error: ShouldNotReachHere()
 #
 # JRE version: 6.0_23-b05
@@ -12,7 +12,7 @@
 
 ---------------  T H R E A D  ---------------
 
-Current thread (0x00846c00):  JavaThread "Unknown thread" [_thread_in_vm, id=832, stack(0x008e0000,0x00930000)]
+Current thread (0x00846c00):  JavaThread "Unknown thread" [_thread_in_vm, id=284, stack(0x008e0000,0x00930000)]
 
 Stack: [0x008e0000,0x00930000],  sp=0x0092f8a4,  free space=318k
 Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
@@ -45,7 +45,7 @@ Java Threads: ( => current thread )
 
 Other Threads:
 
-=>0x00846c00 (exited) JavaThread "Unknown thread" [_thread_in_vm, id=832, stack(0x008e0000,0x00930000)]
+=>0x00846c00 (exited) JavaThread "Unknown thread" [_thread_in_vm, id=284, stack(0x008e0000,0x00930000)]
 
 VM state:not at safepoint (not fully initialized)
 
@@ -91,10 +91,10 @@ OS: Windows XP Build 2600 Service Pack 3
 
 CPU:total 1 (1 cores per cpu, 1 threads per core) family 15 model 1 stepping 3, cmov, cx8, fxsr, mmx, sse, sse2
 
-Memory: 4k page, physical 1015284k(55384k free), swap 1661096k(704428k free)
+Memory: 4k page, physical 1015284k(226268k free), swap 1661096k(651236k free)
 
 vm_info: Java HotSpot(TM) Client VM (19.0-b09) for windows-x86 JRE (1.6.0_23-b05), built on Nov 12 2010 15:00:43 by "java_re" with MS VC++ 7.1 (VS2003)
 
-time: Tue Oct 18 10:26:07 2011
+time: Wed Nov 02 12:25:37 2011
 elapsed time: 0 seconds
 

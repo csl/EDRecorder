@@ -1,31 +1,10 @@
 package com.camera;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.PixelFormat;
-import android.hardware.Camera;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.ShutterCallback;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.media.ExifInterface;
 import android.media.MediaRecorder;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
@@ -61,7 +40,11 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class VideoRecorder extends Activity{
 	  
@@ -75,6 +58,9 @@ public class VideoRecorder extends Activity{
 	  
 	  private String TAG = "VideoRecorder";
 	  private GLSurfaceView glsView;
+	  private Timer timer;
+	  
+	  final AtomicBoolean started = new AtomicBoolean(false);
 	  
 	  // In this method, create an object of MediaRecorder class. Create an object of 
 	    // RecorderPreview class(Customized View). Add RecorderPreview class object
@@ -84,6 +70,7 @@ public class VideoRecorder extends Activity{
 	     super.onCreate(savedInstanceState);
 	     setContentView(R.layout.main);
 
+	     timer = new Timer();
 	     recorder = new MediaRecorder();
 	     recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 	     recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -100,6 +87,7 @@ public class VideoRecorder extends Activity{
 		     {
 	 	        recorder.start();
 		        startedRecording=true;
+//		        timer.schedule(new DateTask(), 0, 15 * 1000);
 		     }
 	     });
 
@@ -109,28 +97,27 @@ public class VideoRecorder extends Activity{
 		     {
 			      //stop the recorder
 			      recorder.stop();
-			      recorder.release();
-			      recorder = null;
-			      stoppedRecording=true;		    	 
+			      recorder.reset();
+				  //recorder.setMaxDuration(5000);
+				  mPreview = new Preview(VideoRecorder.this, recorder);
+				  setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+				    
+				  ((FrameLayout) findViewById(R.id.preview)).addView(mPreview);
+
+				  recorder.start();
+			      startedRecording=true;
 		     }
 	     });
 	     
-	     
-	     Button startClick = (Button) findViewById(R.id.startClick);
-	     startClick.setOnClickListener(new OnClickListener() {
-		     public void onClick(View v) 
-		     {
-		    	 
-		     }
-	     });
-	     
-	     Button stopClick = (Button) findViewById(R.id.stopClick);
-	     stopClick.setOnClickListener(new OnClickListener() {
+	     Button tag = (Button) findViewById(R.id.tag);
+	     tag.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
-		    	 
+	    		 
 		     }
 	     });
+	     
+
 	     //glsView = (GLSurfaceView) findViewById(R.id.mSurfaceView1);
 	     //glsView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
@@ -190,6 +177,19 @@ public class VideoRecorder extends Activity{
 	    return super.onOptionsItemSelected(item);
 	  }
 	  
+	  public class DateTask extends TimerTask 
+	  {
+		    public void run() 
+		    {
+		    	 if(started.get()) {
+		    		 recorder.stop();                
+		          } else {
+		            started.set(true);
+		          }
+		    	 recorder.start();
+		    }
+	  }	  
+	  
 	  class Preview extends SurfaceView implements SurfaceHolder.Callback
 	  {
 	    //Create objects for MediaRecorder and SurfaceHolder.
@@ -221,9 +221,20 @@ public class VideoRecorder extends Activity{
 	      // In this, initialize all parameters of MediaRecorder object.
 	    //The output file will be stored in SD Card.
 	    
-	    public void surfaceCreated(SurfaceHolder holder){
-	      
-	      tempRecorder.setOutputFile("/sdcard/" + Math.random()%1000 + ".3gpp");
+	    public void surfaceCreated(SurfaceHolder holder)
+	    {
+	      int year, month, day;
+          int shour, sminute, sec;
+          final Calendar c = Calendar.getInstance();
+          
+          year = c.get(Calendar.YEAR);
+          month = c.get(Calendar.MONTH);
+          day = c.get(Calendar.DAY_OF_MONTH);          
+          shour = c.get(Calendar.HOUR_OF_DAY);
+          sminute = c.get(Calendar.MINUTE);
+          sec = c.get(Calendar.SECOND);
+	        
+	      tempRecorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
 	      tempRecorder.setPreviewDisplay(mHolder.getSurface());
 	      try{
 	        tempRecorder.prepare();

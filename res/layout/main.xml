@@ -17,14 +17,11 @@ android:layout_height="wrap_content" android:id="@+id/layoutr">
 	android:layout_height="wrap_content" android:id="@+id/astartClick"
 	android:text="start"></Button>
 	<Button android:layout_width="wrap_content"
+	android:layout_height="wrap_content" android:id="@+id/tag"
+	android:text="Mark Video"></Button>	
+	<Button android:layout_width="wrap_content"
 	android:layout_height="wrap_content" android:id="@+id/astopClick"
 	android:text="stop"></Button>	
-	<Button android:layout_width="wrap_content"
-	android:layout_height="wrap_content" android:id="@+id/startClick"
-	android:text="start Capture"></Button>
-	<Button android:layout_width="wrap_content"
-	android:layout_height="wrap_content" android:id="@+id/stopClick"
-	android:text="stop Capture"></Button>
 </LinearLayout>
 
 
