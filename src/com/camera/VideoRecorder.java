@@ -72,9 +72,6 @@ public class VideoRecorder extends Activity{
 
 	     timer = new Timer();
 	     recorder = new MediaRecorder();
-	     recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
-	     recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-	     recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
 	     //recorder.setMaxDuration(5000);
 	     mPreview = new Preview(VideoRecorder.this, recorder);
 	     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -85,9 +82,8 @@ public class VideoRecorder extends Activity{
 	     astartClick.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
-	 	        recorder.start();
-		        startedRecording=true;
-//		        timer.schedule(new DateTask(), 0, 15 * 1000);
+	    		startRec();
+		        timer.schedule(new DateTask(), 15 * 1000, 15 * 1000);
 		     }
 	     });
 
@@ -95,17 +91,8 @@ public class VideoRecorder extends Activity{
 	     astopClick.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
-			      //stop the recorder
-			      recorder.stop();
-			      recorder.reset();
-				  //recorder.setMaxDuration(5000);
-				  mPreview = new Preview(VideoRecorder.this, recorder);
-				  setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-				    
-				  ((FrameLayout) findViewById(R.id.preview)).addView(mPreview);
-
-				  recorder.start();
-			      startedRecording=true;
+		    		stopRec();
+		    		timer.cancel();
 		     }
 	     });
 	     
@@ -136,19 +123,8 @@ public class VideoRecorder extends Activity{
 	  {
 	    super.onPrepareOptionsMenu(menu);
 	    menu.clear(); 
-	    //menu.add(0, 0, 0, "Start Recording"); 
-	    //menu.add(1, 1, 0, "Stop Recording");
 	    menu.add(0, 0, 0, "GoogleMap Tracker");
-	    
-	    /*
-	    menu.setGroupVisible(0, false);
-	    menu.setGroupVisible(1, false);
-	    
-	    if(startedRecording == false)
-	      menu.setGroupVisible(0, true);
-	    else if(startedRecording == true && stoppedRecording == false)
-	      menu.setGroupVisible(1, true);
-	    */
+	    menu.add(1, 1, 1, "EXIT");
 	    
 	    return true;
 	  }
@@ -170,6 +146,10 @@ public class VideoRecorder extends Activity{
 	          open.setClass(VideoRecorder.this, MyGoogleMap.class);
 	          startActivity(open);	    	
 		  break;
+	    case 1:
+	          android.os.Process.killProcess(android.os.Process.myPid());
+	          finish(); 
+	          break;
 	    
 	    default:
 	      break;
@@ -177,16 +157,96 @@ public class VideoRecorder extends Activity{
 	    return super.onOptionsItemSelected(item);
 	  }
 	  
+	  public void startRec()
+	  {
+   	      int year, month, day;
+          int shour, sminute, sec;
+          final Calendar c = Calendar.getInstance();
+          
+          year = c.get(Calendar.YEAR);
+          month = c.get(Calendar.MONTH) + 1;
+          day = c.get(Calendar.DAY_OF_MONTH);          
+          shour = c.get(Calendar.HOUR_OF_DAY);
+          sminute = c.get(Calendar.MINUTE);
+          sec = c.get(Calendar.SECOND);
+
+ 	     recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
+	     recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+	     recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
+	        
+	     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
+	     recorder.setPreviewDisplay(mPreview.getSurface());
+	     
+	      try{
+	    	  recorder.prepare();
+	          recorder.start();
+	      } catch (Exception e) {
+	    	e.printStackTrace();
+	        recorder.release();
+	        recorder = null;
+	      }
+	        startedRecording=true;
+		  
+	  }
+
+	  public void stopRec()
+	  {
+	      try{
+		      recorder.stop();
+		      recorder.reset();
+	      } catch (Exception e) {
+	        recorder.release();
+	        recorder = null;
+	      }
+	  }
+	  
 	  public class DateTask extends TimerTask 
 	  {
 		    public void run() 
 		    {
-		    	 if(started.get()) {
-		    		 recorder.stop();                
-		          } else {
-		            started.set(true);
-		          }
-		    	 recorder.start();
+		   	      int year, month, day;
+		          int shour, sminute, sec;
+		          final Calendar c = Calendar.getInstance();
+		          
+			      try{
+				      recorder.stop();
+				      recorder.reset();
+			      } catch (Exception e) {
+			        recorder.release();
+			        recorder = null;
+			      }
+
+		         try {
+		             Thread.sleep(2000);
+		         }
+		         catch(InterruptedException e) {
+		         }
+		          
+		          year = c.get(Calendar.YEAR);
+		          month = c.get(Calendar.MONTH) + 1;
+		          day = c.get(Calendar.DAY_OF_MONTH);          
+		          shour = c.get(Calendar.HOUR_OF_DAY);
+		          sminute = c.get(Calendar.MINUTE);
+		          sec = c.get(Calendar.SECOND);
+
+		 	     recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
+			     recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+			     recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
+			        
+			     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
+			     recorder.setPreviewDisplay(mPreview.getSurface());
+			     
+			      try{
+			    	  recorder.prepare();
+			          recorder.start();
+			      } catch (Exception e) {
+			    	e.printStackTrace();
+			        recorder.release();
+			        recorder = null;
+			      }
+			        startedRecording=true;
+		         
+		    	 
 		    }
 	  }	  
 	  
@@ -200,7 +260,7 @@ public class VideoRecorder extends Activity{
 	      //surfaceHolder class by calling getHolder() method. After that add   
 	      //callback to the surfaceHolder. The callback will inform when surface is 
 	      //created/changed/destroyed. Also set surface not to have its own buffers.
-	    public Preview(Context context,MediaRecorder recorder) 
+	    public Preview(Context context, MediaRecorder recorder) 
 	    {
 	      super(context);
 	      tempRecorder=recorder;
@@ -223,34 +283,14 @@ public class VideoRecorder extends Activity{
 	    
 	    public void surfaceCreated(SurfaceHolder holder)
 	    {
-	      int year, month, day;
-          int shour, sminute, sec;
-          final Calendar c = Calendar.getInstance();
-          
-          year = c.get(Calendar.YEAR);
-          month = c.get(Calendar.MONTH);
-          day = c.get(Calendar.DAY_OF_MONTH);          
-          shour = c.get(Calendar.HOUR_OF_DAY);
-          sminute = c.get(Calendar.MINUTE);
-          sec = c.get(Calendar.SECOND);
-	        
-	      tempRecorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
-	      tempRecorder.setPreviewDisplay(mHolder.getSurface());
-	      try{
-	        tempRecorder.prepare();
-	      } catch (Exception e) {
-	        String message = e.getMessage();
-	        tempRecorder.release();
-	        tempRecorder = null;
-	      }
 	    }
 	 
 	    public void surfaceDestroyed(SurfaceHolder holder) 
 	    {
 	      if(tempRecorder!=null)
 	      {
-	        tempRecorder.release();
-	        tempRecorder = null;
+	        //tempRecorder.release();
+	        //tempRecorder = null;
 	      }
 	    }
 	 
