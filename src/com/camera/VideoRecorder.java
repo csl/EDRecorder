@@ -24,6 +24,7 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -40,6 +41,7 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Timer;
@@ -51,6 +53,9 @@ public class VideoRecorder extends Activity{
 	  //Create objects of MediaRecorder and Preview class  
 	  private MediaRecorder recorder;
 	  private Preview mPreview;
+	  private TextView timer_view;
+	  
+	  private int SEC = 15;
 	  
 	  boolean flag=false; 
 	  boolean startedRecording=false;
@@ -59,6 +64,10 @@ public class VideoRecorder extends Activity{
 	  private String TAG = "VideoRecorder";
 	  private GLSurfaceView glsView;
 	  private Timer timer;
+	  private long startTime;
+	  private long stopTime;
+	  private FileTagStruct newtag;
+	  static ArrayList<FileTagStruct> fp;
 	  
 	  final AtomicBoolean started = new AtomicBoolean(false);
 	  
@@ -72,18 +81,24 @@ public class VideoRecorder extends Activity{
 
 	     timer = new Timer();
 	     recorder = new MediaRecorder();
+	     
+	     fp = new ArrayList<FileTagStruct>();
 	     //recorder.setMaxDuration(5000);
 	     mPreview = new Preview(VideoRecorder.this, recorder);
+
 	     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-	    
+
 	     ((FrameLayout) findViewById(R.id.preview)).addView(mPreview);
 
+	     timer_view = (TextView) findViewById(R.id.timer_view);
+	     
 	     Button astartClick = (Button) findViewById(R.id.astartClick);
 	     astartClick.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
-	    		startRec();
-		        timer.schedule(new DateTask(), 15 * 1000, 15 * 1000);
+	    		startRec();	    		
+		        timer.schedule(new DateTask(), SEC * 1000, SEC * 1000);
+		        startTime = System.currentTimeMillis();
 		     }
 	     });
 
@@ -100,7 +115,14 @@ public class VideoRecorder extends Activity{
 	     tag.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
-	    		 
+	    		 //tag
+	    		 stopTime = System.currentTimeMillis() - startTime;
+	    		 if (newtag != null)
+	    		 {
+	    			 //ms -> sec
+		    		 newtag.tag.add((int) stopTime / 1000);
+		    		 timer_view.setText(Integer.toString((int) stopTime/1000) + " sec");
+	    		 }
 		     }
 	     });
 	     
@@ -124,7 +146,8 @@ public class VideoRecorder extends Activity{
 	    super.onPrepareOptionsMenu(menu);
 	    menu.clear(); 
 	    menu.add(0, 0, 0, "GoogleMap Tracker");
-	    menu.add(1, 1, 1, "EXIT");
+	    menu.add(1, 1, 1, "TAG");
+	    menu.add(2, 2, 2, "EXIT");
 	    
 	    return true;
 	  }
@@ -147,6 +170,14 @@ public class VideoRecorder extends Activity{
 	          startActivity(open);	    	
 		  break;
 	    case 1:
+	    	if (fp.size() != 0)
+	    	{
+	          open = new Intent();
+	          open.setClass(VideoRecorder.this, edlist.class);
+	          startActivity(open);
+	    	}
+		  break;
+	    case 2:
 	          android.os.Process.killProcess(android.os.Process.myPid());
 	          finish(); 
 	          break;
@@ -175,6 +206,10 @@ public class VideoRecorder extends Activity{
 	     recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
 	        
 	     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
+	     
+	     newtag = new FileTagStruct();
+	     newtag.filename = "/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
+	     
 	     recorder.setPreviewDisplay(mPreview.getSurface());
 	     
 	      try{
@@ -198,6 +233,9 @@ public class VideoRecorder extends Activity{
 	        recorder.release();
 	        recorder = null;
 	      }
+
+	      fp.add(newtag);
+     	  newtag = null;
 	  }
 	  
 	  public class DateTask extends TimerTask 
@@ -217,6 +255,9 @@ public class VideoRecorder extends Activity{
 			      }
 
 		         try {
+		        	 //add info tag
+		        	 fp.add(newtag);
+		        	 newtag = null;
 		             Thread.sleep(2000);
 		         }
 		         catch(InterruptedException e) {
@@ -234,6 +275,8 @@ public class VideoRecorder extends Activity{
 			     recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
 			        
 			     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
+			     newtag = new FileTagStruct();
+			     newtag.filename = "/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
 			     recorder.setPreviewDisplay(mPreview.getSurface());
 			     
 			      try{
@@ -244,9 +287,10 @@ public class VideoRecorder extends Activity{
 			        recorder.release();
 			        recorder = null;
 			      }
-			        startedRecording=true;
-		         
-		    	 
+
+			      startedRecording=true;
+			      
+		          startTime = System.currentTimeMillis();
 		    }
 	  }	  
 	  

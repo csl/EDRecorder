@@ -14,7 +14,8 @@
         </activity>
         <uses-library android:name="com.google.android.maps" />
         <activity android:name=".MyGoogleMap"></activity>
-        
+        <activity android:name=".edlist"></activity>
+            
     </application>
 
 	<!-- allows access to phonegap hardware features -->

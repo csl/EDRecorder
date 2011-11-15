@@ -13,6 +13,9 @@ android:orientation="vertical"
 android:layout_width="wrap_content"
 android:layout_gravity="bottom|center"
 android:layout_height="wrap_content" android:id="@+id/layoutr">
+	<TextView android:layout_width="wrap_content"
+	android:layout_height="wrap_content" android:id="@+id/timer_view"
+	android:text="timer/sec"></TextView>
 	<Button android:layout_width="wrap_content"
 	android:layout_height="wrap_content" android:id="@+id/astartClick"
 	android:text="start"></Button>
