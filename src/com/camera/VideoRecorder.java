@@ -208,7 +208,7 @@ public class VideoRecorder extends Activity{
 	     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
 	     
 	     newtag = new FileTagStruct();
-	     newtag.filename = "/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
+	     newtag.filename = year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
 	     
 	     recorder.setPreviewDisplay(mPreview.getSurface());
 	     
@@ -276,7 +276,7 @@ public class VideoRecorder extends Activity{
 			        
 			     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
 			     newtag = new FileTagStruct();
-			     newtag.filename = "/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
+			     newtag.filename = year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
 			     recorder.setPreviewDisplay(mPreview.getSurface());
 			     
 			      try{

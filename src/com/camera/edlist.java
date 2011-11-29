@@ -1,6 +1,7 @@
 package com.camera;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -67,38 +68,44 @@ public class edlist extends Activity
         	   public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,  
         	     long arg3) 
         	   {
-        		   FTPClient con = new FTPClient();
-        		   
-        		   try
-        		   {
-        		       con.connect("140.116.39.127");
-        		       if (con.login("test", "test"))
-        		       {
-        		           con.enterLocalPassiveMode(); // important!
-        		           String data = "test data";
-        		           ByteArrayInputStream in = new ByteArrayInputStream(data.getBytes());
-        		           boolean result = con.storeFile(VideoRecorder.fp.get(arg2).filename, in);
-        		           in.close();
-        		           
-        		           if (result) 
-        		        	   openOptionsDialog("upload result succeeded");
-        		       }
-        		   }
-        		   catch (Exception e)
-        		   {
-        		       e.printStackTrace();
-        		   }
 
+        	        FTPClient client = new FTPClient();
+        	        FileInputStream fis = null;
 
-        		   try
-        		   {
-        		       con.logout();
-        		       con.disconnect();
-        		   }
-        		   catch (IOException e)
-        		   {
-        		       e.printStackTrace();
-        		   }
+        	        try {
+        	            client.connect("ftp.myweb.hinet.net");
+        	            client.login("bowchang", "loveanita");
+
+        	            //
+        	            // Create an InputStream of the file to be uploaded
+        	            //
+        	            String filename = VideoRecorder.fp.get(arg2).filename;
+        	            Log.i("TAG", filename);
+        	            fis = new FileInputStream("/sdcard/" + filename);
+
+        	            //
+        	            // Store file to server
+        	            //
+        	            client.storeFile(filename, fis);
+        	            client.logout();
+        	            
+        	        } catch (IOException e) {
+        	            e.printStackTrace();
+        	        } finally {
+
+        	        	Toast popup =  Toast.makeText(edlist.this, "¶Ç°e¦¨¥\", Toast.LENGTH_SHORT);
+            	        popup.show();
+            	        
+        	            try {
+        	                if (fis != null) {
+        	                    fis.close();
+        	                }
+        	                client.disconnect();
+        	            } catch (IOException e) {
+        	                e.printStackTrace();
+        	            }
+        	        }        		   
+
         	   }  
         });
         
