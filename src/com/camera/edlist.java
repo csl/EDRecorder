@@ -71,42 +71,45 @@ public class edlist extends Activity
 
         	        FTPClient client = new FTPClient();
         	        FileInputStream fis = null;
+        	        
 
         	        try {
-        	            client.connect("ftp.myweb.hinet.net");
-        	            client.login("bowchang", "loveanita");
+        	            client.connect("192.168.173.100");
+        	            client.login("shulong", "lgaybysp");
 
-        	            //
-        	            // Create an InputStream of the file to be uploaded
-        	            //
-        	            String filename = VideoRecorder.fp.get(arg2).filename;
-        	            Log.i("TAG", filename);
-        	            fis = new FileInputStream("/sdcard/" + filename);
 
-        	            //
-        	            // Store file to server
-        	            //
-        	            client.storeFile(filename, fis);
-        	            client.logout();
-        	            
-        	        } catch (IOException e) {
-        	            e.printStackTrace();
-        	        } finally {
-
-        	        	Toast popup =  Toast.makeText(edlist.this, "傳送成功", Toast.LENGTH_SHORT);
-            	        popup.show();
-            	        
-        	            try {
-        	                if (fis != null) {
-        	                    fis.close();
-        	                }
-        	                client.disconnect();
-        	            } catch (IOException e) {
-        	                e.printStackTrace();
-        	            }
-        	        }        		   
-
-        	   }  
+        	            if (client.isConnected() == true)
+        	            {
+	        	            //
+	        	            // Create an InputStream of the file to be uploaded
+	        	            //
+	        	            String filename = VideoRecorder.fp.get(arg2).filename;
+	        	            Log.i("TAG", filename);
+	        	            fis = new FileInputStream("/sdcard/" + filename);
+	
+	        	            //
+	        	            // Store file to server
+	        	            //
+	        	            client.storeFile(filename, fis);
+	        	            client.logout();
+        	            }     
+	        	        } catch (IOException e) {
+	        	            e.printStackTrace();
+	        	        } finally {
+	
+	        	        	Toast popup =  Toast.makeText(edlist.this, "傳送成功", Toast.LENGTH_SHORT);
+	            	        popup.show();
+	            	        
+	        	            try {
+	        	                if (fis != null) {
+	        	                    fis.close();
+	        	                }
+	        	                client.disconnect();
+	        	            } catch (IOException e) {
+	        	                e.printStackTrace();
+	        	            }
+	        	        }
+         	   } 
         });
         
         Toast popup =  Toast.makeText(edlist.this, "請按上鍵頭跳出", Toast.LENGTH_SHORT);
