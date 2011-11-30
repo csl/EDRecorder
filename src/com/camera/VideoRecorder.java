@@ -79,7 +79,6 @@ public class VideoRecorder extends Activity{
 	     super.onCreate(savedInstanceState);
 	     setContentView(R.layout.main);
 
-	     timer = new Timer();
 	     recorder = new MediaRecorder();
 	     
 	     fp = new ArrayList<FileTagStruct>();
@@ -97,6 +96,7 @@ public class VideoRecorder extends Activity{
 	    	 public void onClick(View v) 
 		     {
 	    		startRec();	    		
+	   	     	timer = new Timer();
 		        timer.schedule(new DateTask(), SEC * 1000, SEC * 1000);
 		        startTime = System.currentTimeMillis();
 		     }
