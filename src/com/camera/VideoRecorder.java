@@ -56,6 +56,8 @@ public class VideoRecorder extends Activity{
 	  private TextView timer_view;
 	  
 	  private int SEC = 15;
+	  private int CUT_SEC = 60;
+
 	  
 	  boolean flag=false; 
 	  boolean startedRecording=false;
@@ -64,6 +66,8 @@ public class VideoRecorder extends Activity{
 	  private String TAG = "VideoRecorder";
 	  private GLSurfaceView glsView;
 	  private Timer timer;
+	  private Timer cut_timer;
+
 	  private long startTime;
 	  private long stopTime;
 	  private FileTagStruct newtag;
@@ -97,7 +101,9 @@ public class VideoRecorder extends Activity{
 		     {
 	    		startRec();	    		
 	   	     	timer = new Timer();
+	   	     	cut_timer = new Timer();
 		        timer.schedule(new DateTask(), SEC * 1000, SEC * 1000);
+		        cut_timer.schedule(new Cut_DateTask(), CUT_SEC * 1000, CUT_SEC * 1000);
 		        startTime = System.currentTimeMillis();
 		     }
 	     });
@@ -238,6 +244,25 @@ public class VideoRecorder extends Activity{
      	  newtag = null;
 	  }
 	  
+	  public class Cut_DateTask extends TimerTask 
+	  {
+		    public void run() 
+		    {
+		    	if (fp.size() == 0) return;
+		    	
+		    	FileTagStruct other = null;
+		    	
+		    	for (int i=0; i<fp.size(); i++)
+		    	{
+		    		other = fp.get(i);
+		    		if (other.tag.size() != 0) continue;
+		    		File file = new File("/sdcard/" + other.filename);
+		    		boolean dd = file.delete();
+		    		fp.remove(i);
+		    	}
+		    }
+	  }	  
+	  
 	  public class DateTask extends TimerTask 
 	  {
 		    public void run() 
@@ -291,6 +316,8 @@ public class VideoRecorder extends Activity{
 			      startedRecording=true;
 			      
 		          startTime = System.currentTimeMillis();
+		          
+		          timer_view.setText("time/sec");
 		    }
 	  }	  
 	  
