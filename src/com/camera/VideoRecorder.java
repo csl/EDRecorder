@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
 import android.media.MediaRecorder;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -48,7 +50,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class VideoRecorder extends Activity{
+public class VideoRecorder extends Activity implements SensorListener  {
 	  
 	  //Create objects of MediaRecorder and Preview class  
 	  private MediaRecorder recorder;
@@ -58,7 +60,6 @@ public class VideoRecorder extends Activity{
 	  private int SEC = 15;
 	  private int CUT_SEC = 60;
 
-	  
 	  boolean flag=false; 
 	  boolean startedRecording=false;
 	  boolean stoppedRecording=false;
@@ -75,6 +76,11 @@ public class VideoRecorder extends Activity{
 	  
 	  final AtomicBoolean started = new AtomicBoolean(false);
 	  
+	  SensorManager sensorMgr;
+	  private long lastUpdate;
+	  float last_x, last_y, last_z;
+	  
+	  private static final int SHAKE_THRESHOLD = 2200;  
 	  // In this method, create an object of MediaRecorder class. Create an object of 
 	    // RecorderPreview class(Customized View). Add RecorderPreview class object
 	    // as content of UI.     
@@ -85,6 +91,10 @@ public class VideoRecorder extends Activity{
 
 	     recorder = new MediaRecorder();
 	     
+	     sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);  
+		 sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_GAME);  
+
+
 	     fp = new ArrayList<FileTagStruct>();
 	     //recorder.setMaxDuration(5000);
 	     mPreview = new Preview(VideoRecorder.this, recorder);
@@ -193,6 +203,43 @@ public class VideoRecorder extends Activity{
 	    }
 	    return super.onOptionsItemSelected(item);
 	  }
+
+	  
+	  public void onSensorChanged(int sensor, float[] values) 
+	  {
+		  if (sensor == SensorManager.SENSOR_ACCELEROMETER) {
+		  long curTime = System.currentTimeMillis();
+
+		  if ((curTime - lastUpdate) > 100) {
+			  long diffTime = (curTime - lastUpdate);
+			  lastUpdate = curTime;
+	
+			  float  x = values[SensorManager.DATA_X];
+			  float y = values[SensorManager.DATA_Y];
+			  float z = values[SensorManager.DATA_Z];
+	
+			  float speed = Math.abs(x + y + z - last_x - last_y - last_z) / diffTime * 10000;
+	
+			  if (speed > SHAKE_THRESHOLD) 
+			  {
+				  Log.d("sensor", "shake detected w/ speed:" + speed);
+				  Toast.makeText(this, "shake", Toast.LENGTH_SHORT).show();
+	    		 //tag
+	    		 stopTime = System.currentTimeMillis() - startTime;
+	    		 if (newtag != null)
+	    		 {
+	    			 //ms -> sec
+		    		 newtag.tag.add((int) stopTime / 1000);
+		    		 timer_view.setText(Integer.toString((int) stopTime/1000) + " sec");
+	    		 }
+			  }
+			  last_x = x;
+			  last_y = y;
+			  last_z = z;
+			  }
+		  }
+	  }
+	  
 	  
 	  public void startRec()
 	  {
@@ -316,8 +363,6 @@ public class VideoRecorder extends Activity{
 			      startedRecording=true;
 			      
 		          startTime = System.currentTimeMillis();
-		          
-		          timer_view.setText("time/sec");
 		    }
 	  }	  
 	  
@@ -370,5 +415,11 @@ public class VideoRecorder extends Activity{
 	    	Log.i(TAG, w + "," + "h");
 	 
 	    }
-	  }   
+	  }
+
+	@Override
+	public void onAccuracyChanged(int arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
+	}   
 	}
