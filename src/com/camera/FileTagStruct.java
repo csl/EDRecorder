@@ -7,10 +7,13 @@ public class FileTagStruct {
 
 	public String filename;
 	public ArrayList<Integer> tag;
+	public boolean upload;
 	
 	FileTagStruct()
 	{
+		filename = "";
 		tag = new ArrayList<Integer>();
+		upload = false;
 	}
 	
 

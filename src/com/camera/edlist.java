@@ -68,7 +68,14 @@ public class edlist extends Activity
         	   public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,  
         	     long arg3) 
         	   {
-
+        		   
+        		   if (VideoRecorder.fp.get(arg2).upload == true)
+        		   {
+	       	        	Toast popup =  Toast.makeText(edlist.this, "此影片已傳送", Toast.LENGTH_SHORT);
+	        	        popup.show();
+        			    return;
+        		   }
+        		   
         	        FTPClient client = new FTPClient();
         	        FileInputStream fis = null;
         	        
@@ -100,6 +107,10 @@ public class edlist extends Activity
 	        	        	Toast popup =  Toast.makeText(edlist.this, "傳送成功", Toast.LENGTH_SHORT);
 	            	        popup.show();
 	            	        
+	            	        FileTagStruct tmp = VideoRecorder.fp.get(arg2);
+	            	        tmp.upload = true;
+	            	        VideoRecorder.fp.set(arg2, tmp);
+	            	        
 	        	            try {
 	        	                if (fis != null) {
 	        	                    fis.close();
@@ -124,7 +135,11 @@ public class edlist extends Activity
 		{	
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			FileTagStruct tmp = VideoRecorder.fp.get(i);
-			map.put("ItemTitle", tmp.filename);
+			
+			if (tmp.upload == false)
+				map.put("ItemTitle", tmp.filename);
+			else
+				map.put("ItemTitle", tmp.filename + " (已上傳)");
 			
 			String tags = "";
 	        for (int j=0; j<tmp.tag.size(); j++) 

@@ -50,6 +50,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.net.ftp.FTPClient;
+
 public class VideoRecorder extends Activity implements SensorListener  {
 	  
 	  //Create objects of MediaRecorder and Preview class  
@@ -80,7 +82,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	  private long lastUpdate;
 	  float last_x, last_y, last_z;
 	  
-	  private static final int SHAKE_THRESHOLD = 2200;  
+	  private static final int SHAKE_THRESHOLD = 5000;  
 	  // In this method, create an object of MediaRecorder class. Create an object of 
 	    // RecorderPreview class(Customized View). Add RecorderPreview class object
 	    // as content of UI.     
@@ -138,6 +140,12 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    			 //ms -> sec
 		    		 newtag.tag.add((int) stopTime / 1000);
 		    		 timer_view.setText(Integer.toString((int) stopTime/1000) + " sec");
+	    		 }
+	    		 //upload
+	    		 if (newtag.upload == false)
+	    		 {
+	    			 upload(newtag.filename);
+	    			 newtag.upload = true;
 	    		 }
 		     }
 	     });
@@ -232,6 +240,14 @@ public class VideoRecorder extends Activity implements SensorListener  {
 		    		 newtag.tag.add((int) stopTime / 1000);
 		    		 timer_view.setText(Integer.toString((int) stopTime/1000) + " sec");
 	    		 }
+
+	    		 //upload
+	    		 if (newtag.upload == false)
+	    		 {
+	    			 upload(newtag.filename);
+	    			 newtag.upload = true;
+	    		 }
+	    		 
 			  }
 			  last_x = x;
 			  last_y = y;
@@ -364,7 +380,51 @@ public class VideoRecorder extends Activity implements SensorListener  {
 			      
 		          startTime = System.currentTimeMillis();
 		    }
-	  }	  
+	  }
+	  
+		public void upload(String filename)
+		{
+		        FTPClient client = new FTPClient();
+		        FileInputStream fis = null;
+		        
+
+		        try {
+		            client.connect("192.168.173.100");
+		            client.login("shulong", "lgaybysp");
+
+
+		            if (client.isConnected() == true)
+		            {
+	    	            //
+	    	            // Create an InputStream of the file to be uploaded
+	    	            //
+	    	            Log.i("TAG", filename);
+	    	            fis = new FileInputStream("/sdcard/" + filename);
+
+	    	            //
+	    	            // Store file to server
+	    	            //
+	    	            client.storeFile(filename, fis);
+	    	            client.logout();
+		            }     
+	    	        } catch (IOException e) {
+	    	            e.printStackTrace();
+	    	        } finally {
+
+	    	        	Toast popup =  Toast.makeText(VideoRecorder.this, "¶Ç°e¦¨¥\", Toast.LENGTH_SHORT);
+	        	        popup.show();
+	        	        
+	    	            try {
+	    	                if (fis != null) {
+	    	                    fis.close();
+	    	                }
+	    	                client.disconnect();
+	    	            } catch (IOException e) {
+	    	                e.printStackTrace();
+	    	            }
+	    	        }		
+		}
+	  
 	  
 	  class Preview extends SurfaceView implements SurfaceHolder.Callback
 	  {
@@ -416,7 +476,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	 
 	    }
 	  }
-
+	  
 	@Override
 	public void onAccuracyChanged(int arg0, int arg1) {
 		// TODO Auto-generated method stub
