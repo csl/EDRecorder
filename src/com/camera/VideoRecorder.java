@@ -81,6 +81,9 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	  SensorManager sensorMgr;
 	  private long lastUpdate;
 	  float last_x, last_y, last_z;
+	  boolean upload_t;
+	  
+	  boolean auto_load = false;
 	  
 	  private static final int SHAKE_THRESHOLD = 5000;  
 	  // In this method, create an object of MediaRecorder class. Create an object of 
@@ -90,32 +93,39 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	  {
 	     super.onCreate(savedInstanceState);
 	     setContentView(R.layout.main);
-
-	     recorder = new MediaRecorder();
 	     
+	     upload_t = false;
+
+	     //12. 震動時加入
 	     sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);  
 		 sensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_GAME);  
 
-
-	     fp = new ArrayList<FileTagStruct>();
+		 //1. 最簡易的錄影功能
+	     recorder = new MediaRecorder();
 	     //recorder.setMaxDuration(5000);
 	     mPreview = new Preview(VideoRecorder.this, recorder);
 
-	     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	     //4. 清單管使用
+	     fp = new ArrayList<FileTagStruct>();
 
-	     ((FrameLayout) findViewById(R.id.preview)).addView(mPreview);
-
-	     timer_view = (TextView) findViewById(R.id.timer_view);
 	     
+		 //1. 最簡易的錄影功能
+	     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	     ((FrameLayout) findViewById(R.id.preview)).addView(mPreview);
+	     timer_view = (TextView) findViewById(R.id.timer_view);
 	     Button astartClick = (Button) findViewById(R.id.astartClick);
 	     astartClick.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
+	    		//2.開始&結束錄影功能 
 	    		startRec();	    		
+	    		//3.循環錄影 
 	   	     	timer = new Timer();
-	   	     	cut_timer = new Timer();
 		        timer.schedule(new DateTask(), SEC * 1000, SEC * 1000);
+	    		//7. 若沒tag則錄影檔案清除 
+	   	     	cut_timer = new Timer();
 		        cut_timer.schedule(new Cut_DateTask(), CUT_SEC * 1000, CUT_SEC * 1000);
+		        //5. 加入tag功能
 		        startTime = System.currentTimeMillis();
 		     }
 	     });
@@ -124,6 +134,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	     astopClick.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
+		    		//2.開始&結束錄影功能 
 		    		stopRec();
 		    		timer.cancel();
 		     }
@@ -133,27 +144,22 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	     tag.setOnClickListener(new OnClickListener() {
 	    	 public void onClick(View v) 
 		     {
-	    		 //tag
+ 		         //5. 加入tag功能
 	    		 stopTime = System.currentTimeMillis() - startTime;
 	    		 if (newtag != null)
 	    		 {
 	    			 //ms -> sec
+	    			 //6. 結構加入tag支援
 		    		 newtag.tag.add((int) stopTime / 1000);
 		    		 timer_view.setText(Integer.toString((int) stopTime/1000) + " sec");
 	    		 }
 	    		 //upload
-	    		 if (newtag.upload == false)
-	    		 {
-	    			 upload(newtag.filename);
-	    			 newtag.upload = true;
-	    		 }
+	    		 if (auto_load == true)
+	    			 upload_t = true;
+	    		
 		     }
 	     });
 	     
-
-	     //glsView = (GLSurfaceView) findViewById(R.id.mSurfaceView1);
-	     //glsView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
-
 	   } 
 	  
 	   /*!
@@ -170,6 +176,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    super.onPrepareOptionsMenu(menu);
 	    menu.clear(); 
 	    menu.add(0, 0, 0, "GoogleMap Tracker");
+        //4. 清單管使用
 	    menu.add(1, 1, 1, "TAG");
 	    menu.add(2, 2, 2, "EXIT");
 	    
@@ -202,6 +209,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    	}
 		  break;
 	    case 2:
+	    	  //11. 結束程式修正
 	          android.os.Process.killProcess(android.os.Process.myPid());
 	          finish(); 
 	          break;
@@ -213,11 +221,13 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	  }
 
 	  
+      //12. 震動時加入
 	  public void onSensorChanged(int sensor, float[] values) 
 	  {
 		  if (sensor == SensorManager.SENSOR_ACCELEROMETER) {
 		  long curTime = System.currentTimeMillis();
 
+		  //13. 設定時間防止震動太快
 		  if ((curTime - lastUpdate) > 100) {
 			  long diffTime = (curTime - lastUpdate);
 			  lastUpdate = curTime;
@@ -242,11 +252,9 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    		 }
 
 	    		 //upload
-	    		 if (newtag.upload == false)
-	    		 {
-	    			 upload(newtag.filename);
-	    			 newtag.upload = true;
-	    		 }
+	    		 if (auto_load == true)
+	    			 upload_t = true;
+				     
 	    		 
 			  }
 			  last_x = x;
@@ -256,9 +264,10 @@ public class VideoRecorder extends Activity implements SensorListener  {
 		  }
 	  }
 	  
-	  
+	  //2.開始&結束錄影功能 
 	  public void startRec()
 	  {
+          //8. 改由時間的檔名進行儲存影像
    	      int year, month, day;
           int shour, sminute, sec;
           final Calendar c = Calendar.getInstance();
@@ -276,6 +285,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	        
 	     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
 	     
+         //5. 加入tag功能
 	     newtag = new FileTagStruct();
 	     newtag.filename = year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
 	     
@@ -293,6 +303,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 		  
 	  }
 
+		//2.開始&結束錄影功能 
 	  public void stopRec()
 	  {
 	      try{
@@ -307,6 +318,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
      	  newtag = null;
 	  }
 	  
+	  //7. 若沒tag則錄影檔案清除 
 	  public class Cut_DateTask extends TimerTask 
 	  {
 		    public void run() 
@@ -314,7 +326,8 @@ public class VideoRecorder extends Activity implements SensorListener  {
 		    	if (fp.size() == 0) return;
 		    	
 		    	FileTagStruct other = null;
-		    	
+		
+
 		    	for (int i=0; i<fp.size(); i++)
 		    	{
 		    		other = fp.get(i);
@@ -326,6 +339,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 		    }
 	  }	  
 	  
+   	  //3.循環錄影 
 	  public class DateTask extends TimerTask 
 	  {
 		    public void run() 
@@ -341,16 +355,24 @@ public class VideoRecorder extends Activity implements SensorListener  {
 			        recorder.release();
 			        recorder = null;
 			      }
+			      
+			      if (newtag.upload == false && upload_t == true)
+		    	  {
+		    			 newtag.upload = true;
+		          }
 
 		         try {
 		        	 //add info tag
 		        	 fp.add(newtag);
 		        	 newtag = null;
+		        	 
+		        	 //9. 修改循環錄影switch的時間
 		             Thread.sleep(2000);
 		         }
 		         catch(InterruptedException e) {
 		         }
 		          
+		          //8. 改由時間的檔名進行儲存影像
 		          year = c.get(Calendar.YEAR);
 		          month = c.get(Calendar.MONTH) + 1;
 		          day = c.get(Calendar.DAY_OF_MONTH);          
@@ -363,6 +385,8 @@ public class VideoRecorder extends Activity implements SensorListener  {
 			     recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
 			        
 			     recorder.setOutputFile("/sdcard/" + year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp");
+			     
+			    
 			     newtag = new FileTagStruct();
 			     newtag.filename = year + "_" + month +  "_" + day + "_" + shour + "_" + sminute  + "_" +  sec + ".3gpp";
 			     recorder.setPreviewDisplay(mPreview.getSurface());
@@ -379,18 +403,38 @@ public class VideoRecorder extends Activity implements SensorListener  {
 			      startedRecording=true;
 			      
 		          startTime = System.currentTimeMillis();
+		          
+		          if (upload_t == true)
+		          {
+					    	 Thread t = new upload(newtag.filename);
+					         t.start(); 
+
+			    			 upload_t = false;
+
+		          }
 		    }
 	  }
 	  
-		public void upload(String filename)
-		{
-		        FTPClient client = new FTPClient();
+	  public class upload extends Thread 
+	  {
+		  
+		    String filename;
+
+		  	upload(String mfilename)
+		  	{
+		  		filename = mfilename;
+		  	}
+	  
+		    public void run() 
+		    {
+	    	    //10. ftp上傳功能
+		    	FTPClient client = new FTPClient();
 		        FileInputStream fis = null;
 		        
-
+		        
 		        try {
-		            client.connect("192.168.173.100");
-		            client.login("shulong", "lgaybysp");
+		            client.connect("ftp.myweb.hinet.net");
+		            client.login("a85056250", "2oliouoi");
 
 
 		            if (client.isConnected() == true)
@@ -399,6 +443,13 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    	            // Create an InputStream of the file to be uploaded
 	    	            //
 	    	            Log.i("TAG", filename);
+	    	            
+	    	            try {
+	   		             Thread.sleep(2000);
+		   		         }
+		   		         catch(InterruptedException e) {
+		   		         }
+	    	            
 	    	            fis = new FileInputStream("/sdcard/" + filename);
 
 	    	            //
@@ -410,9 +461,6 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    	        } catch (IOException e) {
 	    	            e.printStackTrace();
 	    	        } finally {
-
-	    	        	Toast popup =  Toast.makeText(VideoRecorder.this, "傳送成功", Toast.LENGTH_SHORT);
-	        	        popup.show();
 	        	        
 	    	            try {
 	    	                if (fis != null) {
@@ -422,10 +470,12 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    	            } catch (IOException e) {
 	    	                e.printStackTrace();
 	    	            }
-	    	        }		
-		}
+	    	        }				       
+		    }
+	  }
 	  
 	  
+      //1. 最簡易的錄影功能
 	  class Preview extends SurfaceView implements SurfaceHolder.Callback
 	  {
 	    //Create objects for MediaRecorder and SurfaceHolder.
@@ -477,7 +527,7 @@ public class VideoRecorder extends Activity implements SensorListener  {
 	    }
 	  }
 	  
-	@Override
+	
 	public void onAccuracyChanged(int arg0, int arg1) {
 		// TODO Auto-generated method stub
 		

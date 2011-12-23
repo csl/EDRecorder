@@ -2,6 +2,8 @@ package com.camera;
 
 import java.util.ArrayList;
 
+//6. 清單加入後
+
 /** Class to hold our location information */
 public class FileTagStruct {
 

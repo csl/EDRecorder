@@ -49,6 +49,8 @@ public class edlist extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edlist);
         
+	     //4. 清單管使用
+
         //Display: create ListView class
         show_view = (ListView)findViewById(R.id.listview);
         
@@ -64,7 +66,7 @@ public class edlist extends Activity
         show_view.setAdapter(listitemAdapter);              
         show_view.setOnItemClickListener(new OnItemClickListener() 
         {          
-        	   @Override  
+        	  
         	   public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,  
         	     long arg3) 
         	   {
@@ -79,10 +81,10 @@ public class edlist extends Activity
         	        FTPClient client = new FTPClient();
         	        FileInputStream fis = null;
         	        
-
+                    //10. ftp上傳功能
         	        try {
-        	            client.connect("192.168.173.100");
-        	            client.login("shulong", "lgaybysp");
+        	            client.connect("ftp.myweb.hinet.net");
+        	            client.login("a85056250", "2oliouoi");
 
 
         	            if (client.isConnected() == true)
@@ -127,6 +129,7 @@ public class edlist extends Activity
         popup.show();
     }
 	
+	//4. 清單管使用
 	public ArrayList<HashMap<String, Object>> getFileItems() 
 	{
 		ArrayList<HashMap<String, Object>> listitem = new ArrayList<HashMap<String,Object>>();
